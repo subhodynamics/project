@@ -7,6 +7,7 @@ const chatFormContainer = "coding_desc_container__gdB9M";
 // ! Function to check page change
 
 let lastPageVisited = "";
+let allInputTextContent = '';
 
 const observer = new MutationObserver(() => {
     handleContentChange();
@@ -48,6 +49,7 @@ function handlePageChange() {
     if (onTargetPage()) {
         cleanUpPage();
         addChatButton();
+        getContext();
     }
 }
 
@@ -168,7 +170,6 @@ function injectCSS() {
 }
 
 function showChatForm() {
-
     // Remove the chat button when chat form is shown
     const chatButton = document.getElementById('add-chat-button');
     if (chatButton) chatButton.remove();
@@ -209,8 +210,11 @@ function showChatForm() {
                 // Clear the input field
                 inputField.value = "";
 
+                // Fetch context before calling Gemini API
+                getContext();
+
                 // Call Gemini API
-                const responseMessage = await callGeminiAPI(userMessage);
+                const responseMessage = await callGeminiAPI(userMessage, allInputTextContent);
 
                 // Add response to the chat
                 const responseMessageElement = document.createElement("p");
@@ -296,7 +300,9 @@ function injectCSSinForm() {
     document.head.appendChild(style);
 }
 
-async function callGeminiAPI(userMessage) {
+async function callGeminiAPI(userMessage, allInputTextContent) {
+
+    console.log(allInputTextContent);
 
     // TODO : remove api key
     const apiKey = 'AIzaSyAwIj5hSMliJbtpcBtRMq27BpWl2iS3mJE';
@@ -304,7 +310,10 @@ async function callGeminiAPI(userMessage) {
     
     const payload = {
         contents: [{
-            parts: [{ text: userMessage }]
+            parts: [
+                { text: allInputTextContent },
+                { text: userMessage }
+            ] 
         }]
     };
 
@@ -326,4 +335,26 @@ async function callGeminiAPI(userMessage) {
         console.error("Error calling Gemini API:", error);
         return "Sorry, an error occurred.";
     }
+}
+
+function getContext() {
+    const checkElements = () => {
+        const problemDescription = document.querySelector('.coding_desc__pltWY');
+        const problemInput = document.querySelectorAll('.coding_input_format__pv9fS');
+
+        if (problemDescription && problemInput.length > 0) {
+            allInputTextContent = 'Do not just give me the code, explain the code then if asked, provide me with the code.' + '\n' + 'Here is the coding problem description :' + '\n'
+                                + problemDescription.textContent.trim() + '\n';
+            problemInput.forEach((div) => {
+                allInputTextContent += div.textContent.trim() + '\n';
+            });
+
+            console.log("Context fetched:", allInputTextContent); // Debugging output
+        } else {
+            console.log("Retrying to fetch context...");
+            setTimeout(checkElements, 500); // Retry after 500ms
+        }
+    };
+
+    checkElements();
 }
