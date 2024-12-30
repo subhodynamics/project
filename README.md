@@ -3,7 +3,7 @@ This extension adds an AI chat bot to the maang.in/problems/* route
 
 ## Features
 1. Added a "AI chat button" which appears on only /problems route, even if the site used client side rendering.
-2. Added a AI chat bot to the chat box which answers question.
+2. Added a AI chat bot to the chat box which answers question, and it has the context of the problem too.
 3. Once the chat button is clicked it removes the button and get replaced by a chat box, which looks clearner.
 4. When site is changed the chat box gets removed, and the AI chat button is revoked.
 
