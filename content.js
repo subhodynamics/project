@@ -198,13 +198,24 @@ function showChatForm() {
         const inputField = chatForm.querySelector(".chat-input");
         const messageContainer = chatForm.querySelector(".chat-messages");
 
-        sendButton.addEventListener("click", () => {
-            const message = inputField.value.trim();
-            if (message) {
-                const userMessage = document.createElement("p");
-                userMessage.textContent = message;
-                messageContainer.appendChild(userMessage);
+        sendButton.addEventListener("click", async () => {
+            const userMessage = inputField.value.trim();
+            if (userMessage) {
+                // Add user's message to the chat
+                const userMessageElement = document.createElement("p");
+                userMessageElement.textContent = `You: ${userMessage}`;
+                messageContainer.appendChild(userMessageElement);
+
+                // Clear the input field
                 inputField.value = "";
+
+                // Call Gemini API
+                const responseMessage = await callGeminiAPI(userMessage);
+
+                // Add response to the chat
+                const responseMessageElement = document.createElement("p");
+                responseMessageElement.textContent = `AI: ${responseMessage}`;
+                messageContainer.appendChild(responseMessageElement);
             }
         });
     }
@@ -237,6 +248,7 @@ function injectCSSinForm() {
         .chat-header {
             padding: 10px;
             background: hsl(217, 50%, 45%);
+            border-radius: 8px 8px 0 0;
             border-bottom: 1px solid hsl(217, 33%, 32%);
             font-size: 1.2rem;
             font-weight: bold;
@@ -282,4 +294,36 @@ function injectCSSinForm() {
         }
     `;
     document.head.appendChild(style);
+}
+
+async function callGeminiAPI(userMessage) {
+
+    // TODO : remove api key
+    const apiKey = 'AIzaSyAwIj5hSMliJbtpcBtRMq27BpWl2iS3mJE';
+    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const payload = {
+        contents: [{
+            parts: [{ text: userMessage }]
+        }]
+    };
+
+    try {
+        const response = await fetch(apiURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.candidates[0]?.content?.parts[0]?.text || "No response received.";
+        } else {
+            console.error("Error from Gemini API:", response.status, response.statusText);
+            return "Sorry, something went wrong with the AI.";
+        }
+    } catch (error) {
+        console.error("Error calling Gemini API:", error);
+        return "Sorry, an error occurred.";
+    }
 }

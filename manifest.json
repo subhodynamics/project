@@ -33,7 +33,7 @@
       "24": "assets/logo.png",
       "32": "assets/logo.png"
     },
-    "default_popup": "index.html",
+    "default_popup": "popup.html",
     "default_title": "A tooltip popup description when you hover over the Chrome Extension icon."
   }
 }
