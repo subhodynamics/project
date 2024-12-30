@@ -1,5 +1,6 @@
 
 const chatButtonContainer = "coding_desc_container__gdB9M";
+const chatFormContainer = "coding_desc_container__gdB9M";
 
 // window.addEventListener('load', addChatButton);
 
@@ -36,6 +37,11 @@ function cleanUpPage() {
         chatButton.remove();
         console.log('button must be removed');
     }
+
+    const chatForm = document.getElementById('chat-form');
+    if (chatForm) {
+        chatForm.remove();
+    }
 }
 
 function handlePageChange() {
@@ -43,7 +49,6 @@ function handlePageChange() {
         cleanUpPage();
         addChatButton();
     }
-
 }
 
 // ! Function to add chat button
@@ -66,6 +71,9 @@ function addChatButton() {
     const buttonPlace = document.getElementsByClassName(chatButtonContainer)[0];
 
     buttonPlace.parentNode.insertAdjacentElement('beforeend', chatButton);
+
+    const buttonElement = document.querySelector('.az-chat-button');
+    buttonElement.addEventListener('click', showChatForm);
 
 }
 
@@ -157,4 +165,121 @@ function injectCSS() {
     `;
 
     document.head.appendChild(az_chat_style);  // Append the style tag to the head of the document
+}
+
+function showChatForm() {
+
+    // Remove the chat button when chat form is shown
+    const chatButton = document.getElementById('add-chat-button');
+    if (chatButton) chatButton.remove();
+
+    // Chat form style inject
+    injectCSSinForm();
+
+    if (!document.getElementById("chat-form")) {
+
+        const chatForm = document.createElement("div");
+        chatForm.id = "chat-form";
+        chatForm.innerHTML = `
+            <div class="chat-header">AI Chat</div>
+            <div class="chat-messages">
+                <p>Welcome! How can I assist you?</p>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" placeholder="Type your message here..." />
+                <button class="chat-send-button">Send</button>
+            </div>
+        `;
+
+        const formPlace = document.getElementsByClassName(chatFormContainer)[0];
+        formPlace.parentNode.insertAdjacentElement("beforeend", chatForm);
+
+        const sendButton = chatForm.querySelector(".chat-send-button");
+        const inputField = chatForm.querySelector(".chat-input");
+        const messageContainer = chatForm.querySelector(".chat-messages");
+
+        sendButton.addEventListener("click", () => {
+            const message = inputField.value.trim();
+            if (message) {
+                const userMessage = document.createElement("p");
+                userMessage.textContent = message;
+                messageContainer.appendChild(userMessage);
+                inputField.value = "";
+            }
+        });
+    }
+}
+
+function injectCSSinForm() {
+    const style = document.createElement("style");
+    style.innerHTML = `
+        /* Button Styles (similar to your modal button) */
+        .az-chat-button {
+            /* Add your button styles here */
+        }
+
+        /* Form Styles */
+        #chat-form {
+            // position: relative;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            border: 1px solid hsl(217, 33%, 32%);
+            border-radius: 8px;
+            background: hsl(217, 33%, 17%);
+            color: white;
+            // z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-header {
+            padding: 10px;
+            background: hsl(217, 50%, 45%);
+            border-bottom: 1px solid hsl(217, 33%, 32%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: hsl(217, 33%, 22%);
+        }
+
+        .chat-input-container {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            background: hsl(217, 33%, 32%);
+            color: white;
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: hsl(217, 33%, 50%);
+        }
+
+        .chat-send-button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            background: hsl(217, 50%, 45%);
+            color: white;
+            cursor: pointer;
+        }
+    `;
+    document.head.appendChild(style);
 }
