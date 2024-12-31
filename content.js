@@ -36,7 +36,7 @@ function cleanUpPage() {
     const chatButton = document.getElementById('add-chat-button');
     if (chatButton) {
         chatButton.remove();
-        console.log('button must be removed');
+        // console.log('button must be removed');
     }
 
     const chatForm = document.getElementById('chat-form');
@@ -60,7 +60,7 @@ function addChatButton() {
 
     const chatButton = document.createElement('div');
     chatButton.id = "add-chat-button";
-    console.log('button must be added');
+    // console.log('button must be added');
     chatButton.innerHTML = `<button class="az-chat-button">
     <span class="az-chat-shadow"></span>
     <span class="az-chat-edge"></span>
@@ -182,7 +182,10 @@ function showChatForm() {
         const chatForm = document.createElement("div");
         chatForm.id = "chat-form";
         chatForm.innerHTML = `
-            <div class="chat-header">AI Chat</div>
+            <div class="chat-header">
+            <button class="chat-close-button" title="Close">&times;</button>
+            AI Chat
+            </div>
             <div class="chat-messages">
                 <p>Welcome! How can I assist you?</p>
             </div>
@@ -222,6 +225,13 @@ function showChatForm() {
                 messageContainer.appendChild(responseMessageElement);
             }
         });
+
+        // adding event listener to close the chat form
+        const closeButton = chatForm.querySelector(".chat-close-button");
+        closeButton.addEventListener("click", () => {
+            chatForm.remove();
+            addChatButton();
+        });
     }
 }
 
@@ -235,24 +245,21 @@ function injectCSSinForm() {
 
         /* Form Styles */
         #chat-form {
-            // position: relative;
+            // position: absolute;
             bottom: 10px;
             right: 10px;
-            width: 300px;
+            width: 500px;
+            height: 600px;
             border: 1px solid hsl(217, 33%, 32%);
             border-radius: 8px;
             background: hsl(217, 33%, 17%);
             color: white;
-            // z-index: 1000;
             display: flex;
             flex-direction: column;
-            resize: both;
-            overflow: auto;
-            // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         .chat-header {
-            padding: 10px;
+            padding: 15px;
             background: hsl(217, 50%, 45%);
             border-radius: 8px 8px 0 0;
             border-bottom: 1px solid hsl(217, 33%, 32%);
@@ -261,24 +268,38 @@ function injectCSSinForm() {
             text-align: center;
         }
 
+        .chat-close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .chat-close-button:hover {
+            color: hsl(217, 50%, 70%);
+        }
+
         .chat-messages {
             flex: 1;
-            max-height: 200px;
+            max-height: 480px;
             overflow-y: auto;
-            padding: 10px;
+            padding: 15px;
             background: hsl(217, 33%, 22%);
         }
 
         .chat-input-container {
             display: flex;
             align-items: center;
-            padding: 10px;
-            gap: 10px;
+            padding: 15px;
+            gap: 15px;
         }
 
         .chat-input {
             flex: 1;
-            padding: 8px;
+            padding: 12px;
+            font-size: 1rem;
             border: none;
             border-radius: 8px;
             background: hsl(217, 33%, 32%);
@@ -291,7 +312,8 @@ function injectCSSinForm() {
         }
 
         .chat-send-button {
-            padding: 8px 12px;
+            padding: 12px 16px;
+            font-size: 1rem;
             border: none;
             border-radius: 8px;
             background: hsl(217, 50%, 45%);
@@ -304,7 +326,7 @@ function injectCSSinForm() {
 
 async function callGeminiAPI(userMessage, allInputTextContent) {
 
-    console.log(allInputTextContent);
+    // console.log(allInputTextContent);
 
     // TODO : remove api key
     const apiKey = 'AIzaSyAwIj5hSMliJbtpcBtRMq27BpWl2iS3mJE';
@@ -328,7 +350,10 @@ async function callGeminiAPI(userMessage, allInputTextContent) {
 
         if (response.ok) {
             const data = await response.json();
-            return data.candidates[0]?.content?.parts[0]?.text || "No response received.";
+            const responseText = data.candidates[0]?.content?.parts[0]?.text || "No response received.";
+
+            return responseText;
+
         } else {
             console.error("Error from Gemini API:", response.status, response.statusText);
             return "Sorry, something went wrong with the AI.";
@@ -351,9 +376,9 @@ function getContext() {
                 allInputTextContent += div.textContent.trim() + '\n';
             });
 
-            console.log("Context fetched:", allInputTextContent); // Debugging output
+            // console.log("Context fetched:", allInputTextContent); // Debugging output
         } else {
-            console.log("Retrying to fetch context...");
+            // console.log("Retrying to fetch context...");
             setTimeout(checkElements, 500); // Retry after 500ms
         }
     };

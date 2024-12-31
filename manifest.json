@@ -6,7 +6,8 @@
   "description": "AI chatbot for AZ problems",
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "scripting"
   ],
   "content_scripts": [
     {
