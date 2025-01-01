@@ -1,5 +1,6 @@
 
-const chatButtonContainer = "coding_desc_container__gdB9M";
+// const chatButtonContainer = "coding_desc_container__gdB9M";
+const chatButtonContainer = "coding_nav_bg__HRkIn p-2 nav nav-pills w-100 ";
 const chatFormContainer = "coding_desc_container__gdB9M";
 const pageUrl = window.location.href;
 const uniqueId = extractUniqueId(pageUrl);
@@ -12,6 +13,7 @@ let lastPageVisited = "";
 let allInputTextContent = '';
 const observer = new MutationObserver(() => {
     handleContentChange();
+    console.log("Mutation observed");
 });
 
 observer.observe(document.body, {childList: true, subtree: true});
@@ -19,7 +21,10 @@ observer.observe(document.body, {childList: true, subtree: true});
 handleContentChange();
 
 function handleContentChange() {
-    if (isPageChanged()) handlePageChange();
+    if (isPageChanged()) {
+        handlePageChange();
+        console.log("Page changed");
+    }
 }
 
 function isPageChanged() {
@@ -48,6 +53,7 @@ function cleanUpPage() {
 
 function handlePageChange() {
     if (onTargetPage()) {
+        console.log("changes done on target page");
         cleanUpPage();
         addChatButton();
         getContext();
@@ -82,7 +88,7 @@ function addChatButton() {
 
     const buttonPlace = document.getElementsByClassName(chatButtonContainer)[0];
 
-    buttonPlace.parentNode.insertAdjacentElement('beforeend', chatButton);
+    buttonPlace.insertAdjacentElement('afterbegin', chatButton);
 
     const buttonElement = document.querySelector('.az-chat-button');
     buttonElement.addEventListener('click', showChatForm);
@@ -102,6 +108,7 @@ function injectCSS() {
             outline: none;
             cursor: pointer;
             font-family: sans-serif;
+            margin-right: 10px;
         }
         
         /* az-chat-shadow layer */
@@ -112,7 +119,7 @@ function injectCSS() {
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.25);
-            border-radius: 8px;
+            border-radius: 6px;
             transform: translateY(2px);
             transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
         }
@@ -140,11 +147,11 @@ function injectCSS() {
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 28px;
-            font-size: 1.25rem;
+            padding: 5.76px 16px;
+            font-size: 0.9rem;
             color: white;
             background: hsl(217, 33%, 17%);
-            border-radius: 8px;
+            border-radius: 6px;
             transform: translateY(-4px);
             transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
         }
@@ -180,78 +187,85 @@ function injectCSS() {
 }
 
 function showChatForm() {
-    // Remove the chat button when chat form is shown
-    const chatButton = document.getElementById('add-chat-button');
-    if (chatButton) chatButton.remove();
+    // console.log(document.getElementByClassName(chatFormContainer)[0]);
+    if (document.querySelector('.coding_desc_container__gdB9M')) {
 
-    // Chat form style inject
-    injectCSSinForm();
+        // Remove the chat button when chat form is shown
+        const chatButton = document.getElementById('add-chat-button');
+        if (chatButton) chatButton.remove();
 
-    if (!document.getElementById("chat-form")) {
+        // Chat form style inject
+        injectCSSinForm();
+
+        if (!document.getElementById("chat-form")) {
 
 
-        const chatForm = document.createElement("div");
-        chatForm.id = "chat-form";
-        chatForm.innerHTML = `
-            <div class="chat-header">
-            <button class="chat-close-button" title="Close">&times;</button>
-            AI Chat
-            </div>
-            <div class="chat-messages">
-                <p>Welcome! How can I assist you?</p>
-            </div>
-            <div class="chat-input-container">
-                <input type="text" class="chat-input" placeholder="Type your message here..." />
-                <button class="chat-send-button">Send</button>
-            </div>
-        `;
+            const chatForm = document.createElement("div");
+            chatForm.id = "chat-form";
+            chatForm.innerHTML = `
+                <div class="chat-header">
+                <button class="chat-close-button" title="Close">&times;</button>
+                AI Chat
+                </div>
+                <div class="chat-messages">
+                    <p>Welcome! How can I assist you?</p>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" placeholder="Type your message here..." />
+                    <button class="chat-send-button">Send</button>
+                </div>
+            `;
 
-        const formPlace = document.getElementsByClassName(chatFormContainer)[0];
-        formPlace.parentNode.insertAdjacentElement("beforeend", chatForm);
+            const formPlace = document.getElementsByClassName(chatFormContainer)[0];
+            formPlace.parentNode.insertAdjacentElement("beforeend", chatForm);
 
-        const sendButton = chatForm.querySelector(".chat-send-button");
-        const inputField = chatForm.querySelector(".chat-input");
-        const messageContainer = chatForm.querySelector(".chat-messages");
+            const sendButton = chatForm.querySelector(".chat-send-button");
+            const inputField = chatForm.querySelector(".chat-input");
+            const messageContainer = chatForm.querySelector(".chat-messages");
 
-        // load chat history
-        loadChatHistory(uniqueId, messageContainer);
+            // load chat history
+            loadChatHistory(uniqueId, messageContainer);
 
-        sendButton.addEventListener("click", async () => {
-            const userMessage = inputField.value.trim();
-            if (userMessage) {
-                // Add user's message to the chat
-                const userMessageElement = document.createElement("p");
-                userMessageElement.textContent = `You: ${userMessage}`;
-                messageContainer.appendChild(userMessageElement);
+            sendButton.addEventListener("click", async () => {
+                const userMessage = inputField.value.trim();
+                if (userMessage) {
+                    // Add user's message to the chat
+                    const userMessageElement = document.createElement("p");
+                    userMessageElement.textContent = `You: ${userMessage}`;
+                    messageContainer.appendChild(userMessageElement);
 
-                // Save chat history for the user for current uniqueId
-                saveChatHistory(uniqueId, userMessage, "user");
+                    // Save chat history for the user for current uniqueId
+                    saveChatHistory(uniqueId, userMessage, "user");
 
-                // Clear the input field
-                inputField.value = "";
+                    // Clear the input field
+                    inputField.value = "";
 
-                // Fetch context before calling Gemini API
-                getContext();
+                    // Fetch context before calling Gemini API
+                    getContext();
 
-                // Call Gemini API
-                const responseMessage = await callGeminiAPI(userMessage, allInputTextContent);
+                    // Call Gemini API
+                    const responseMessage = await callGeminiAPI(userMessage, allInputTextContent);
 
-                // Add response to the chat
-                const responseMessageElement = document.createElement("p");
-                responseMessageElement.textContent = `AI: ${responseMessage}`;
-                messageContainer.appendChild(responseMessageElement);
+                    // Add response to the chat
+                    const responseMessageElement = document.createElement("p");
+                    responseMessageElement.textContent = `AI: ${responseMessage}`;
+                    messageContainer.appendChild(responseMessageElement);
 
-                // Save chat history for the AI for current uniqueId
-                saveChatHistory(uniqueId, responseMessage, "AI");
-            }
-        });
+                    // Save chat history for the AI for current uniqueId
+                    saveChatHistory(uniqueId, responseMessage, "AI");
+                }
+            });
 
-        // adding event listener to close the chat form
-        const closeButton = chatForm.querySelector(".chat-close-button");
-        closeButton.addEventListener("click", () => {
-            chatForm.remove();
-            addChatButton();
-        });
+            // adding event listener to close the chat form
+            const closeButton = chatForm.querySelector(".chat-close-button");
+            closeButton.addEventListener("click", () => {
+                chatForm.remove();
+                addChatButton();
+            });
+        }
+    }else {
+        // Show a popup if the class does not exist
+        alert('Go to Descritpion page');
     }
 }
 
