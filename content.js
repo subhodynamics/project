@@ -5,10 +5,8 @@ const chatFormContainer = "coding_desc_container__gdB9M";
 // window.addEventListener('load', addChatButton);
 
 // ! Function to check page change
-
 let lastPageVisited = "";
 let allInputTextContent = '';
-
 const observer = new MutationObserver(() => {
     handleContentChange();
 });
@@ -325,13 +323,20 @@ function injectCSSinForm() {
 }
 
 async function callGeminiAPI(userMessage, allInputTextContent) {
-
-    // console.log(allInputTextContent);
-
-    // TODO : remove api key
-    const apiKey = 'AIzaSyAwIj5hSMliJbtpcBtRMq27BpWl2iS3mJE';
-    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
     
+    const apiKey = await new Promise((resolve, reject) => {
+        chrome.storage.sync.get('apiKey', (data) => {
+            resolve(data.apiKey)
+        });
+    });
+
+    if (!apiKey) {
+        console.error("API Key not found.");
+        return "Please set your API key in the extension popup.";
+    }
+
+    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
     const payload = {
         contents: [{
             parts: [

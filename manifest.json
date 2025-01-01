@@ -35,6 +35,6 @@
       "32": "assets/logo.png"
     },
     "default_popup": "popup.html",
-    "default_title": "A tooltip popup description when you hover over the Chrome Extension icon."
+    "default_title": "Popup to enter and save the api key to use the gemini api"
   }
 }
