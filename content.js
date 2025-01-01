@@ -1,6 +1,9 @@
 
 const chatButtonContainer = "coding_desc_container__gdB9M";
 const chatFormContainer = "coding_desc_container__gdB9M";
+const pageUrl = window.location.href;
+const uniqueId = extractUniqueId(pageUrl);
+console.log(uniqueId , " outside");
 
 // window.addEventListener('load', addChatButton);
 
@@ -49,6 +52,15 @@ function handlePageChange() {
         addChatButton();
         getContext();
     }
+}
+
+function extractUniqueId (url) {
+    const start = url.indexOf("problems/") + "problems/".length; 
+    const end = url.indexOf("?", start); 
+    const result = end === -1 ? url.slice(start) : url.slice(start, end);
+
+    return result;
+    // console.log(result);
 }
 
 // ! Function to add chat button
@@ -177,6 +189,7 @@ function showChatForm() {
 
     if (!document.getElementById("chat-form")) {
 
+
         const chatForm = document.createElement("div");
         chatForm.id = "chat-form";
         chatForm.innerHTML = `
@@ -200,6 +213,9 @@ function showChatForm() {
         const inputField = chatForm.querySelector(".chat-input");
         const messageContainer = chatForm.querySelector(".chat-messages");
 
+        // load chat history
+        loadChatHistory(uniqueId, messageContainer);
+
         sendButton.addEventListener("click", async () => {
             const userMessage = inputField.value.trim();
             if (userMessage) {
@@ -207,6 +223,9 @@ function showChatForm() {
                 const userMessageElement = document.createElement("p");
                 userMessageElement.textContent = `You: ${userMessage}`;
                 messageContainer.appendChild(userMessageElement);
+
+                // Save chat history for the user for current uniqueId
+                saveChatHistory(uniqueId, userMessage, "user");
 
                 // Clear the input field
                 inputField.value = "";
@@ -221,6 +240,9 @@ function showChatForm() {
                 const responseMessageElement = document.createElement("p");
                 responseMessageElement.textContent = `AI: ${responseMessage}`;
                 messageContainer.appendChild(responseMessageElement);
+
+                // Save chat history for the AI for current uniqueId
+                saveChatHistory(uniqueId, responseMessage, "AI");
             }
         });
 
@@ -387,6 +409,33 @@ function getContext() {
             setTimeout(checkElements, 500); // Retry after 500ms
         }
     };
-
     checkElements();
+}
+
+// save chat history
+
+function saveChatHistory(uniqueId, message, sender = "user") {
+    const newMessage = { sender, message };
+
+    chrome.storage.local.get([uniqueId], (result) => {
+        const chatHistory = result[uniqueId] || [];
+        chatHistory.push(newMessage);
+
+        chrome.storage.local.set({ [uniqueId]: chatHistory }, () => {
+            console.log(`Chat history saved for ${uniqueId}`);
+        });
+    });
+}
+
+// load the chat history on the chat box
+
+function loadChatHistory(uniqueId, container) {
+    chrome.storage.local.get([uniqueId], (result) => {
+        const chatHistory = result[uniqueId] || [];
+        chatHistory.forEach(({ sender, message }) => {
+            const messageElement = document.createElement("p");
+            messageElement.textContent = `${sender === "user" ? "You" : "AI"}: ${message}`;
+            container.appendChild(messageElement);
+        });
+    });
 }
